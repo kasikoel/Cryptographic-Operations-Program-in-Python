@@ -1,2 +1,3 @@
 # Cryptographic-Operations-Program-in-Python
-Developed a program for cryptographic operations, allowing users to generate public and private key pairs
+Developed a program for cryptographic operations, allowing users to generate public and private key pairs. The program facilitates encryption of text messages using the public key, decryption using the corresponding private key, and the generation of digital signatures. Users can authenticate the originality of a digital signature using the associated public key. This comprehensive cryptographic tool enhances data security by enabling secure communication, ensuring message integrity, and providing robust authentication mechanisms. The program underscores proficiency in cryptographic concepts, key management, and secure communication protocols. 
+

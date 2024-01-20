@@ -1,0 +1,202 @@
+
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import random
+import math
+# import sympy
+# from sympy import mod_inverse
+
+# FUNCTIONS!
+ 
+
+def pseudoprime(n1 = 1000000, n2 = 100000000, k = 1000):
+    p = random.randint(n1, n2)
+    pseudo_prime = False
+    while not pseudo_prime:
+        for i in range(k):
+            j = random.randint(2, p)
+            if pow(j, p-1, p) > 1:
+                p = random.randint(n1, n2)
+                break
+        pseudo_prime = True
+
+    return p
+
+# Testing primality 
+def testPrime_brute_force(p = 10):
+    if (p == 2):
+        return True
+    else:
+        for b in range(2, math.floor(math.sqrt(p))):
+            if math.gcd(p, b) > 1:
+                return False
+            else:
+                continue
+        return True
+    
+#Generating the two primes 
+def generate_prime():
+    while(True):
+        pseudo_prime = pseudoprime()
+        if(testPrime_brute_force(pseudo_prime)):
+            break
+
+    return pseudo_prime
+
+"""
+#old code
+def generate_large_prime(bits=100):
+    while True:
+        candidate = random.getrandbits(bits)
+        if candidate % 2 == 0:
+            candidate += 1  
+        if sympy.isprime(candidate):
+            return candidate
+
+# Function to generate two large prime numbers
+def generate_two_large_primes(bits=100):
+    prime1 = generate_large_prime(bits)
+    prime2 = generate_large_prime(bits)
+    return prime1, prime2
+"""
+
+#Generating phi
+def gen_phi(prime1,prime2):
+    phi = (prime1-1)*(prime2-1)
+    return phi
+
+#Generating n
+def gen_n(prime1,prime2):
+    n = prime1*prime2
+    return n
+
+# Function to calculate the greatest common divisor (GCD) using Euclid's algorithm 
+def gcd(a, b):
+    if b == 0:
+        return a
+    else:
+        return gcd(b, a%b)
+    
+# Find an 'e' relatively prime to phi 
+def find_e(phi):
+    e = random.randint(2, phi)
+    while gcd (e, phi) != 1:
+        e = random.randint(2, phi)
+    return e
+
+#Extended GCD Form for efficiently determing the private key 
+def extendedGCD(a=1, b=1):
+    if (b==0):
+        return (1,0,a)
+    (x,y,d) = extendedGCD(b,a%b)
+    
+    return y, x-a//b*y, d
+
+#Generating d  
+def generate_private_key(e,phi):
+    x = extendedGCD(e,phi)
+    d = x[0] % phi
+
+    return d
+
+#Encryption
+def encrypt_message(message, e, n):
+    message = message.upper()
+    encrypted_message = []
+    for x in message:
+        x = pow(ord(x),e,n) 
+            
+        encrypted_message.append(x)
+
+    return encrypted_message
+
+
+#Decryption
+def decrypt_message(encrypted_data, d, n):
+    decyphered_message = ''
+    var = 0
+
+    for x in (encrypted_data):
+        var = pow(x,d,n)
+        
+        if(var == 32):
+            decyphered_message += chr(var)
+        else:
+            var = (var-65)%26
+            decyphered_message += chr(var+65)
+
+    return decyphered_message
+
+signatures_received = {}
+
+def sign_message(message, d, n):
+    convertmessage = message.encode()
+    codemessage = int.from_bytes(convertmessage,'big')
+    S = pow(codemessage, d, n)
+    return S
+
+def authenticate_signature(Signature_list, e, n, message):
+    codemessage = int.from_bytes(message.encode('utf-8'), 'big')
+    for S in Signature_list:
+        result = pow(S, e, n)
+       
+        if result == codemessage:
+            return True  
+        else:
+            return False 
+
+"""
+#OLD CODE
+#Generating digital signature 
+def signature(message, d, n):
+  """  
+
+"""
+# Function to calculate modular exponentiation (used for encryption and decryption)
+def mod_pow(base, exponent, modulus):
+    result = 1
+    while exponent > 0:
+        if exponent % 2 == 1:
+            result = (result * base) % modulus
+        base = (base * base) % modulus
+        exponent //= 2
+    return result
+
+# Function to generate RSA keys
+def generate_rsa_keys(bits=100):
+    prime1, prime2 = generate_two_large_primes(bits)
+    n = prime1 * prime2
+    phi = (prime1 - 1) * (prime2 - 1)
+    e = find_e(phi)
+    d = mod_inverse(e, phi)
+    public_key = (n, e)
+    private_key = (n, d)
+    return public_key, private_key
+
+# Function to encrypt a message
+def encrypt_message(public_key, message):
+    n, e = public_key
+    encrypted_message = [mod_pow(ord(char), e, n) for char in message]
+    return encrypted_message
+
+# Function to decrypt a message
+def decrypt_message(private_key, encrypted_message):
+    n, d = private_key
+    decrypted_message = ''.join([chr(mod_pow(char, d, n)) for char in encrypted_message])
+    return decrypted_message
+
+# Function to sign a message
+def sign_message(private_key, message):
+    n, d = private_key
+    signature = [pow(ord(char), d, n) for char in message]
+    return signature
+
+# Function to verify a digital signature
+def verify_signature(public_key, message, signature):
+    n, e = public_key
+    decrypted_signature = [pow(char, e, n) for char in signature]
+    original_message = ''.join([chr(char) for char in decrypted_signature])
+    return original_message == message
+"""
